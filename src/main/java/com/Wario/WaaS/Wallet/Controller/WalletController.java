@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,43 +26,55 @@ public class WalletController {
     private final WalletFactory walletFactory;
 
     @PostMapping(value = "/wallet")
-    public WalletEntity createWallet(@PathVariable String companyId,
-                                     @RequestBody CreateWalletRequest createWalletRequest) {
-        return walletFactory.createWallet(companyId,createWalletRequest);
+    public ResponseEntity<WalletEntity> createWallet(@PathVariable String companyId,
+                                                    @RequestBody CreateWalletRequest createWalletRequest) {
+        return new ResponseEntity<>(walletFactory.createWallet(companyId, createWalletRequest),
+                HttpStatus.CREATED);
     }
     @GetMapping(value = "/users/{userId}/wallet", produces = "application/json")
-    public WalletEntity getWallet(@PathVariable String companyId,
+    public  ResponseEntity<WalletEntity> getWallet(@PathVariable String companyId,
                                   @PathVariable String userId) {
-        return walletFactory.getWalletByCompanyIdAndUserId(companyId, userId);
+        return new ResponseEntity<>(
+                walletFactory.getWalletByCompanyIdAndUserId(companyId, userId),
+                HttpStatus.OK);
     }
 
     @PostMapping(value = "/users/{userId}/wallet/addBalance")
-    public WalletEntity addBalance(@PathVariable String companyId,
+    public ResponseEntity<Transaction> addBalance(@PathVariable String companyId,
                                    @PathVariable String userId,
                                    @RequestBody AddBalanceRequest addBalanceRequest) {
-        return walletFactory.addBalance(companyId,userId,addBalanceRequest);
+
+        return new ResponseEntity<>(
+                walletFactory.addBalance(companyId, userId, addBalanceRequest),
+                HttpStatus.OK);
     }
 
     @PostMapping(value = "/users/{userId}/wallet/buy", produces = "application/json")
-    public Transaction buy(@PathVariable String companyId,
+    public ResponseEntity<Transaction> buy(@PathVariable String companyId,
                            @PathVariable String userId,
                            @RequestBody TransactionDTO transactionDTO) {
 
-        return walletFactory.buy(companyId,userId,transactionDTO);
+        return new ResponseEntity<>(
+                walletFactory.buy(companyId, userId, transactionDTO),
+                HttpStatus.OK);
     }
 
     @GetMapping(value = "/users/{userId}/wallet/transactions", produces = "application/json")
-    public List<Transaction> getTransactionsByWallet(@PathVariable String companyId,
+    public ResponseEntity<List<Transaction>> getTransactionsByWallet(@PathVariable String companyId,
                                                      @PathVariable String userId,
                                                      @RequestParam int page,
                                                      @RequestParam int limit,
                                                      @RequestParam @Nullable String sortBy) {
 
         Pageable pageable = PageRequest.of(page,limit);
+
         if (sortBy != null) {
             pageable = PageRequest.of(page,limit, Sort.by(sortBy));
         }
 
-        return walletFactory.getTransactions(companyId,userId,pageable);
+        return new ResponseEntity<>(
+                walletFactory.getTransactions(companyId, userId, pageable),
+                HttpStatus.OK
+        );
     }
 }
