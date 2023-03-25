@@ -5,16 +5,19 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Builder
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Transaction {
+public class Transaction implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "TransactionSeqGenerator")
     @SequenceGenerator(name = "TransactionSeqGenerator", sequenceName = "transaction_seq", allocationSize = 1)
@@ -33,21 +36,9 @@ public class Transaction {
 
     @PrePersist
     private void prePersist() {
-        if ( fromIdentifier == null|| toIdentifier == null)
-            throw new InvalidDataException("Either toIdentifier or fromIdentifier");
+        if ( fromIdentifier == null && toIdentifier == null)
+            throw new InvalidDataException("Either toIdentifier or fromIdentifier should be present");
 
         dateTime = LocalDateTime.now();
-    }
-
-    @Override
-    public String toString() {
-        return "Transaction{" +
-                "id=" + id +
-                ", fromIdentifier='" + fromIdentifier + '\'' +
-                ", toIdentifier='" + toIdentifier + '\'' +
-                ", dateTime=" + dateTime +
-                ", remark='" + remark + '\'' +
-                ", amount=" + amount +
-                '}';
     }
 }
