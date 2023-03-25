@@ -28,18 +28,21 @@ public class WalletFactory {
     public WalletEntity createWallet(String companyId,
                                      CreateWalletRequest createWalletRequest) {
 
-        WalletEntity wallet = WalletEntity.builder()
+        WalletEntity wallet = walletRepository.save(WalletEntity.builder()
                 .userId(createWalletRequest.getUserId())
                 .companyId(companyId)
                 .balance(BigDecimal.ZERO)
                 .walletType(WalletType.Closed)
-                .build();
+                .build()
+        );
+
 
         if (createWalletRequest.getBalance().equals(BigDecimal.ZERO)) {
-            return walletRepository.save(wallet);
+            return wallet;
         }
 
-        return addBalance(wallet,createWalletRequest.getBalance());
+        addBalance(wallet,createWalletRequest.getBalance());
+        return wallet;
     }
 
     public WalletEntity getWalletByCompanyIdAndUserId(String companyId,
@@ -48,16 +51,16 @@ public class WalletFactory {
                 .orElseThrow(WalletNotFound::new);
     }
 
-    private WalletEntity addBalance(WalletEntity wallet,BigDecimal amount) {
+
+    private Transaction addBalance(WalletEntity wallet,BigDecimal amount) {
         wallet.setBalance(wallet.getBalance().add(amount));
-        transactionFactory.createTransaction(wallet, TransactionDTO.builder()
-                .toIdentifier(String.valueOf(wallet.getId()))
+        walletRepository.save(wallet);
+        return transactionFactory.addMoney(wallet, TransactionDTO.builder()
                 .amount(amount)
                 .build());
-        return walletRepository.save(wallet);
     }
 
-    public WalletEntity addBalance(String companyId, String userId, AddBalanceRequest addBalanceRequest) {
+    public Transaction addBalance(String companyId, String userId, AddBalanceRequest addBalanceRequest) {
         return addBalance(getWalletByCompanyIdAndUserId(companyId,userId),addBalanceRequest.getAmount());
     }
 
@@ -71,7 +74,7 @@ public class WalletFactory {
         wallet.setBalance(wallet.getBalance().subtract(transactionDTO.getAmount()));
         walletRepository.save(wallet);
 
-        return transactionFactory.createTransaction(wallet,transactionDTO);
+        return transactionFactory.spendMoney(wallet,transactionDTO);
     }
 
     public List<Transaction> getTransactions(String companyId, String userId, Pageable pageable) {
