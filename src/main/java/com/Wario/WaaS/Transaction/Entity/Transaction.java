@@ -1,12 +1,14 @@
 package com.Wario.WaaS.Transaction.Entity;
 
+import com.Wario.WaaS.Exception.InvalidDataException;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Builder
@@ -14,16 +16,38 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class Transaction {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "TransactionSeqGenerator")
+    @SequenceGenerator(name = "TransactionSeqGenerator", sequenceName = "transaction_seq", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    private long fromIdentifier;
+    private String fromIdentifier;
 
-    private long toIdentifier;
+    private String toIdentifier;
 
-    private LocalDate date;
+    private LocalDateTime dateTime;
     private String remark;
 
+    @NotNull
     private BigDecimal amount;
+
+    @PrePersist
+    private void prePersist() {
+        if ( fromIdentifier == null|| toIdentifier == null)
+            throw new InvalidDataException("Either toIdentifier or fromIdentifier");
+
+        dateTime = LocalDateTime.now();
+    }
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "id=" + id +
+                ", fromIdentifier='" + fromIdentifier + '\'' +
+                ", toIdentifier='" + toIdentifier + '\'' +
+                ", dateTime=" + dateTime +
+                ", remark='" + remark + '\'' +
+                ", amount=" + amount +
+                '}';
+    }
 }
