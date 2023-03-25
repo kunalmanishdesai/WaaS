@@ -1,5 +1,7 @@
+CREATE SEQUENCE IF NOT EXISTS wallet_entity_seq START WITH 1 INCREMENT BY 1;
+
 CREATE TABLE wallet_entity (
-  id BIGINT NOT NULL,
+   id BIGINT NOT NULL,
    wallet_type VARCHAR(255),
    owner VARCHAR(255),
    user_id VARCHAR(255),
@@ -8,4 +10,4 @@ CREATE TABLE wallet_entity (
    CONSTRAINT pk_walletentity PRIMARY KEY (id)
 );
 
-ALTER TABLE wallet_entity ADD CONSTRAINT uc_walletentity_userid UNIQUE (user_id);
+ALTER TABLE wallet_entity ADD CONSTRAINT uc_walletentity_userid UNIQUE (user_id, company_id);
