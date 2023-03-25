@@ -11,9 +11,6 @@ import java.math.BigDecimal;
 public class TransactionDTO {
 
     @NotNull
-    private String toIdentifier;
-
-    @NotNull
     private BigDecimal amount;
 
     private String comment;
