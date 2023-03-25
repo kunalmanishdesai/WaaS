@@ -1,23 +1,31 @@
 package com.Wario.WaaS.Transaction.Service;
 
+import com.Wario.WaaS.Transaction.DTO.TransactionDTO;
 import com.Wario.WaaS.Transaction.Entity.Transaction;
 import com.Wario.WaaS.Transaction.Repository.TransactionRepository;
 import com.Wario.WaaS.Wallet.Entity.WalletEntity;
-import org.springframework.data.domain.PageRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
+@RequiredArgsConstructor
 public class TransactionFactory {
-
-    TransactionRepository repository;
-    public Transaction createTransaction(Transaction transaction) {
-        return repository.save(transaction);
+    private final TransactionRepository repository;
+    public Transaction createTransaction(WalletEntity walletEntity, TransactionDTO transactionDTO) {
+        return repository.save(Transaction.builder()
+                        .amount(transactionDTO.getAmount())
+                        .toIdentifier(String.valueOf(walletEntity.getId()))
+                        .remark(transactionDTO.getComment())
+                        .build());
     }
 
-    public List<Transaction> getTransactionsForWallet(WalletEntity walletEntity, int page, int limit, String sortBy) {
-        return repository.findAllByToIdentifierOrFromIdentifier(walletEntity.getId(),walletEntity.getId(),
-                PageRequest.of(page,limit, Sort.by(sortBy)));
+    public List<Transaction> getTransactionsForWallet(WalletEntity walletEntity, Pageable pageable) {
+        String walletIdentifier = String.valueOf(walletEntity.getId());
+
+        return repository.findAllByToIdentifierOrFromIdentifier(walletIdentifier,
+                walletIdentifier, pageable);
     };
 }
