@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransactionFactory {
     private final TransactionRepository repository;
-    public Transaction createTransaction(WalletEntity walletEntity, TransactionDTO transactionDTO) {
+    public Transaction addMoney(WalletEntity walletEntity, TransactionDTO transactionDTO) {
         return repository.save(Transaction.builder()
                         .amount(transactionDTO.getAmount())
                         .toIdentifier(String.valueOf(walletEntity.getId()))
@@ -22,10 +22,18 @@ public class TransactionFactory {
                         .build());
     }
 
+    public Transaction spendMoney(WalletEntity walletEntity, TransactionDTO transactionDTO) {
+        return repository.save(Transaction.builder()
+                .amount(transactionDTO.getAmount())
+                .fromIdentifier(String.valueOf(walletEntity.getId()))
+                .remark(transactionDTO.getComment())
+                .build());
+    }
+
     public List<Transaction> getTransactionsForWallet(WalletEntity walletEntity, Pageable pageable) {
         String walletIdentifier = String.valueOf(walletEntity.getId());
 
         return repository.findAllByToIdentifierOrFromIdentifier(walletIdentifier,
                 walletIdentifier, pageable);
-    };
+    }
 }
