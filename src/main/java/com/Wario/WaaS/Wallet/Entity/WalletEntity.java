@@ -16,7 +16,8 @@ import java.math.BigDecimal;
 @Entity
 public class WalletEntity implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "WalletEntitySeqGenerator")
+    @SequenceGenerator(name = "WalletEntitySeqGenerator", sequenceName = "wallet_entity_seq", allocationSize = 1)
     @Column(name = "id", nullable = false)
     private long id;
 
